@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,10 +13,12 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
+    private BestScore bestScore;
     
     private bool m_GameOver = false;
 
@@ -36,6 +40,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        bestScore = LoadData();
+        BestScoreText.text = $"Best Score : {bestScore.name} : {bestScore.points}";
     }
 
     private void Update()
@@ -57,6 +63,7 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
@@ -70,7 +77,39 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        if (m_Points > bestScore.points)
+        {
+            BestScore bs = new BestScore();
+            bs.name = MenuManager.instance.playerName;
+            bs.points = m_Points;
+            SaveData(bs);
+        }
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    [System.Serializable]
+    public class BestScore
+    {
+        public string name = "";
+        public int points = 0;
+    }
+
+    public void SaveData(BestScore bs)
+    {
+        string json = JsonUtility.ToJson(bs);
+        File.WriteAllText(Application.persistentDataPath + "/savedatafile.json", json);
+    }
+
+    public BestScore LoadData()
+    {
+        string path = Application.persistentDataPath + "/savedatafile.json";
+        Debug.Log(path);
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            return JsonUtility.FromJson<BestScore>(json);
+        }
+        return new BestScore();
     }
 }
