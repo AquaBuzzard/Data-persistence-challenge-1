@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class MainManager : MonoBehaviour
 {
+    public static MainManager MainManagerInstance;
+
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
@@ -18,11 +20,18 @@ public class MainManager : MonoBehaviour
     
     private bool m_Started = false;
     private int m_Points;
-    private BestScore bestScore;
+    public BestScore bestScore;
     
     private bool m_GameOver = false;
 
-    
+
+    public void Awake()
+    {
+        MainManagerInstance = this;
+       
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,7 +49,7 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
-        bestScore = LoadData();
+        bestScore = BestScore.LoadData();
         BestScoreText.text = $"Best Score : {bestScore.name} : {bestScore.points}";
     }
 
@@ -82,34 +91,9 @@ public class MainManager : MonoBehaviour
             BestScore bs = new BestScore();
             bs.name = MenuManager.instance.playerName;
             bs.points = m_Points;
-            SaveData(bs);
+            BestScore.SaveData();
         }
         m_GameOver = true;
         GameOverText.SetActive(true);
-    }
-
-    [System.Serializable]
-    public class BestScore
-    {
-        public string name = "";
-        public int points = 0;
-    }
-
-    public void SaveData(BestScore bs)
-    {
-        string json = JsonUtility.ToJson(bs);
-        File.WriteAllText(Application.persistentDataPath + "/savedatafile.json", json);
-    }
-
-    public BestScore LoadData()
-    {
-        string path = Application.persistentDataPath + "/savedatafile.json";
-        Debug.Log(path);
-        if (File.Exists(path))
-        {
-            string json = File.ReadAllText(path);
-            return JsonUtility.FromJson<BestScore>(json);
-        }
-        return new BestScore();
-    }
+    }  
 }

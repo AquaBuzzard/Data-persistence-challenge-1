@@ -4,6 +4,8 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
+
 
 public class MenuManager : MonoBehaviour
 {
@@ -18,13 +20,16 @@ public class MenuManager : MonoBehaviour
     public void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(gameObject); 
+        DontDestroyOnLoad(gameObject);
+        
+       
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        BestScore bestScore = BestScore.LoadData();
+        bestScoreText.text = $"Best Score  : {bestScore.name} : {bestScore.points}";
     }
 
     // Update is called once per frame
@@ -43,4 +48,6 @@ public class MenuManager : MonoBehaviour
        playerName =  nameInputField.text;
         
     }
+
+   
 }
